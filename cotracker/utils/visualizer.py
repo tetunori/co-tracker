@@ -269,7 +269,7 @@ class Visualizer:
                             color=vector_colors[t, i].astype(int),
                             visible=visibile,
                         )
-                        print("frame: %d, x:%f, y:%f", t, coord[0], coord[1])
+                        print("frame: %d, index:%d, x:%f, y:%f" % (t, i, coord[0], coord[1]))
             res_video[t] = np.array(img)
 
         #  construct the final rgb sequence
