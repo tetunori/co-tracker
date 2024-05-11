@@ -14,6 +14,11 @@ import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw
 
+import csv
+header = ['frame', 'ptIdx', 'x', 'y']
+with open('test.csv', 'w', newline='') as f:
+  f.truncate(0)
+  writer.writerow(header)
 
 def read_video_from_path(path):
     try:
@@ -269,7 +274,10 @@ class Visualizer:
                             color=vector_colors[t, i].astype(int),
                             visible=visibile,
                         )
-                        print("frame: %d, index:%d, x:%f, y:%f" % (t, i, coord[0], coord[1]))
+                        # print("frame: %d, index:%d, x:%d, y:%d" % (t, i, coord[0], coord[1]))
+                        data = [t, i, coord[0], coord[1]]
+                        with open('test.csv', 'w', newline='') as f:
+                          writer.writerow(data)
             res_video[t] = np.array(img)
 
         #  construct the final rgb sequence
