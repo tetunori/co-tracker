@@ -18,6 +18,7 @@ import csv
 header = ['frame', 'ptIdx', 'x', 'y']
 with open('test.csv', 'w', newline='') as f:
   f.truncate(0)
+  writer = csv.writer(f)
   writer.writerow(header)
 
 def read_video_from_path(path):
@@ -277,6 +278,7 @@ class Visualizer:
                         # print("frame: %d, index:%d, x:%d, y:%d" % (t, i, coord[0], coord[1]))
                         data = [t, i, coord[0], coord[1]]
                         with open('test.csv', 'w', newline='') as f:
+                          writer = csv.writer(f)
                           writer.writerow(data)
             res_video[t] = np.array(img)
 
