@@ -37,7 +37,16 @@ function draw() {
 
     points.forEach((p, index) => {
       let markSize = defaultMarkSize;
-      if (dist(p.x, p.y, mouseX, mouseY) < markSize) {
+      if (index === draggingPointIdx) {
+        markSize *= 2;
+        push();
+        {
+          fill('red');
+          circle(mouseX, mouseY, markSize);
+        }
+        pop();
+        text(index, mouseX + defaultMarkSize * 2, mouseY);
+      } else if (dist(p.x, p.y, mouseX, mouseY) < markSize) {
         markSize *= 2;
         push();
         {
@@ -45,10 +54,11 @@ function draw() {
           circle(p.x, p.y, markSize);
         }
         pop();
+        text(index, p.x + defaultMarkSize * 2, p.y);
       } else {
         circle(p.x, p.y, markSize);
+        text(index, p.x + defaultMarkSize * 2, p.y);
       }
-      text(index, p.x + defaultMarkSize * 2, p.y);
     });
   } else {
     push();
@@ -74,36 +84,33 @@ function draw() {
 }
 
 const handleFile = (f) => {
-
   // console.log(f)
 
-  if (f.type === "image") {
+  if (f.type === 'image') {
     // Remove the current image, if any.
     if (img) {
       img.remove();
     }
     // Create an  element with the
     // dropped file.
-    img = createImg(f.data, '', '', ()=>{
+    img = createImg(f.data, '', '', () => {
       resizeCanvas(img.width, img.height);
     });
     img.hide();
   }
 
-  if (f.type === "text") {
-    let dataText = f.data.replaceAll('.','');
-    dataText = dataText.replaceAll(']','');
-    dataText = dataText.replaceAll(' ','');
+  if (f.type === 'text') {
+    let dataText = f.data.replaceAll('.', '');
+    dataText = dataText.replaceAll(']', '');
+    dataText = dataText.replaceAll(' ', '');
     const dataArray = dataText.split(',');
 
     points.length = 0;
-    dataArray.forEach( (e,i)=>{
-      if( i > 2 && i%3 === 0){
-        points.push({ x: Number(dataArray[i]), y: Number(dataArray[i+1]) }); 
+    dataArray.forEach((e, i) => {
+      if (i > 2 && i % 3 === 0) {
+        points.push({ x: Number(dataArray[i]), y: Number(dataArray[i + 1]) });
       }
     });
-
-    console.log(points)
   }
 };
 
@@ -133,6 +140,8 @@ const showCursorCoordinate = () => {
   pop();
 };
 
+let draggingPointIdx = undefined;
+
 function mousePressed() {
   if (!img) {
     return;
@@ -143,14 +152,27 @@ function mousePressed() {
     points.forEach((p, index) => {
       let markSize = defaultMarkSize;
       if (dist(p.x, p.y, mouseX, mouseY) < markSize) {
-        points.splice(index, 1);
+        if (mouseButton !== LEFT) {
+          points.splice(index, 1);
+        } else {
+          draggingPointIdx = index;
+        }
         isFoundExistingPoint = true;
       }
     });
 
     if (!isFoundExistingPoint) {
-      points.push({ x: mouseX, y: mouseY });
+      if (mouseButton === LEFT) {
+        points.push({ x: mouseX, y: mouseY });
+      }
     }
+  }
+}
+
+function mouseReleased() {
+  if (draggingPointIdx !== undefined) {
+    points[draggingPointIdx] = { x: mouseX, y: mouseY };
+    draggingPointIdx = undefined;
   }
 }
 
@@ -192,4 +214,8 @@ const outputScript = (name, text) => {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+};
+
+document.oncontextmenu = (e) => {
+  e.preventDefault();
 };
