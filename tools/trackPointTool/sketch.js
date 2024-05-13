@@ -58,6 +58,8 @@ function draw() {
     }
     pop();
   }
+
+  showCursorCoordinate();
 }
 
 const handleFile = (f) => {
@@ -70,6 +72,32 @@ const handleFile = (f) => {
   img = createImg(f.data, '');
   img.hide();
   resizeCanvas(img.width, img.height);
+};
+
+const showCursorCoordinate = () => {
+  push();
+  {
+    textSize(width / 80);
+    const str = '(' + mouseX + ', ' + mouseY + ')';
+    const w = textWidth(str) * 1.1;
+
+    let yOffset = width / 50;
+    if (mouseY > height / 2) {
+      yOffset *= -1;
+    }
+    let xOffset = width / 30;
+    if (mouseX > width / 2) {
+      xOffset *= -1;
+    }
+    noStroke();
+    fill('#00000090');
+    rectMode(CENTER);
+    rect(mouseX + xOffset, mouseY + yOffset, w, textSize() * 1.5, 5);
+    fill('white');
+    textAlign(CENTER, CENTER);
+    text(str, mouseX + xOffset, mouseY + yOffset);
+  }
+  pop();
 };
 
 function mousePressed() {
