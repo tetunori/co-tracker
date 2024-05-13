@@ -5,7 +5,15 @@ const points = [];
 const defaultMarkSize = 5;
 const markColor = 'white';
 
+// Options
+const gOptions = {
+  frameIndex: 0,
+};
+
 function setup() {
+  // Prepare GUI
+  prepareDatGUI(gOptions);
+
   cvs = createCanvas(windowWidth, windowHeight);
   cvs.drop(handleFile);
 
@@ -21,6 +29,9 @@ function setup() {
 
 function draw() {
   background(220);
+  const opt = gOptions;
+  opt.frameIndex = options.frameIndex;
+
   if (img) {
     image(img, 0, 0, img.width, img.height);
 
@@ -126,15 +137,37 @@ function keyPressed() {
     points.pop();
   }
 
-  switch (keyCode) {
-    case 49: //1: Start record
-      myP5MovRec.startRec();
-      break;
-    case 50: //2: set webm, stop
-      // myP5MovRec.setMovType(P5MovRec.movTypeId.webm); // webm is default value
-      myP5MovRec.stopRec();
-      break;
-    default:
-      break;
-  }
+  // switch (keyCode) {
+  //   case 49: //1: Start record
+  //     myP5MovRec.startRec();
+  //     break;
+  //   case 50: //2: set webm, stop
+  //     // myP5MovRec.setMovType(P5MovRec.movTypeId.webm); // webm is default value
+  //     myP5MovRec.stopRec();
+  //     break;
+  //   default:
+  //     break;
+  // }
 }
+
+const downloadData = () => {
+  const name = getYYYYMMDD_hhmmss(true) + '.txt';
+  let dataText = '    # [frameIdx, xPos, yPos] \n';
+  points.forEach((p, index) => {
+    dataText +=
+      '    [' + gOptions.frameIndex + '., ' + p.x + '., ' + p.y + '.],  # ' + index + '\n';
+  });
+  outputScript(name, dataText);
+};
+
+const outputScript = (name, text) => {
+  // create .txt file since .js files will be stopped for security reason.
+  let blob = new Blob([text], { type: 'text/plain' });
+  let a = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  a.href = url;
+  a.download = name;
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
