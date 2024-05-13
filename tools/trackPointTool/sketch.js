@@ -74,17 +74,37 @@ function draw() {
 }
 
 const handleFile = (f) => {
-  // Remove the current image, if any.
-  if (img) {
-    img.remove();
+
+  // console.log(f)
+
+  if (f.type === "image") {
+    // Remove the current image, if any.
+    if (img) {
+      img.remove();
+    }
+    // Create an  element with the
+    // dropped file.
+    img = createImg(f.data, '', '', ()=>{
+      resizeCanvas(img.width, img.height);
+    });
+    img.hide();
   }
-  // Create an  element with the
-  // dropped file.
-  img = createImg(f.data, '', '', ()=>{
-    resizeCanvas(img.width, img.height);
-  });
-  img.hide();
-  
+
+  if (f.type === "text") {
+    let dataText = f.data.replaceAll('.','');
+    dataText = dataText.replaceAll(']','');
+    dataText = dataText.replaceAll(' ','');
+    const dataArray = dataText.split(',');
+
+    points.length = 0;
+    dataArray.forEach( (e,i)=>{
+      if( i > 2 && i%3 === 0){
+        points.push({ x: Number(dataArray[i]), y: Number(dataArray[i+1]) }); 
+      }
+    });
+
+    console.log(points)
+  }
 };
 
 const showCursorCoordinate = () => {
