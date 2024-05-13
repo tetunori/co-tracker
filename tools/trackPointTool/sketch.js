@@ -80,9 +80,11 @@ const handleFile = (f) => {
   }
   // Create an  element with the
   // dropped file.
-  img = createImg(f.data, '');
+  img = createImg(f.data, '', '', ()=>{
+    resizeCanvas(img.width, img.height);
+  });
   img.hide();
-  resizeCanvas(img.width, img.height);
+  
 };
 
 const showCursorCoordinate = () => {
