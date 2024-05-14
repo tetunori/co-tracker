@@ -26,7 +26,7 @@ const prepareDatGUI = (opt) => {
   initializeSettings();
 
   const step = 1;
-  optionFolder.add(options, 'frameIndex', 0, 1000, step);
+  optionFolder.add(options, 'frameIndex', 0, 10000, step);
   optionFolder.open();
 
   //  -- Utilities

@@ -1,5 +1,6 @@
 let myP5MovRec; // Please prepare instance in global
 let img;
+let vd;
 let cvs;
 const points = [];
 const defaultMarkSize = 5;
@@ -80,6 +81,12 @@ function draw() {
     pop();
   }
 
+  if(vd){
+    const frameIndex = Math.floor(vd.elt.currentTime * 29.97); // tentative
+    options.frameIndex = frameIndex;
+    gui.updateDisplay();
+  }
+
   showCursorCoordinate();
 }
 
@@ -110,6 +117,14 @@ const handleFile = (f) => {
       if (i > 2 && i % 3 === 0) {
         points.push({ x: Number(dataArray[i]), y: Number(dataArray[i + 1]) });
       }
+    });
+  }
+
+  if (f.type === 'video') {
+    vd = createVideo(f.data, () => {
+      // console.log(vd);
+      noCanvas();
+      vd.showControls();
     });
   }
 };
