@@ -9,6 +9,7 @@ const markColor = 'white';
 // Options
 const gOptions = {
   frameIndex: 0,
+  movieFPS: 29.97,
 };
 
 function setup() {
@@ -32,6 +33,7 @@ function draw() {
   background(220);
   const opt = gOptions;
   opt.frameIndex = options.frameIndex;
+  opt.movieFPS = options.movieFPS;
 
   if (img) {
     image(img, 0, 0, img.width, img.height);
@@ -81,10 +83,12 @@ function draw() {
     pop();
   }
 
-  if(vd){
-    const frameIndex = Math.floor(vd.elt.currentTime * 29.97); // tentative
-    options.frameIndex = frameIndex;
-    gui.updateDisplay();
+  if (vd) {
+    const frameIndex = Math.floor(vd.elt.currentTime * options.movieFPS);
+    if (options.frameIndex !== frameIndex) {
+      options.frameIndex = frameIndex;
+      gui.updateDisplay();
+    }
   }
 
   showCursorCoordinate();

@@ -23,10 +23,11 @@ const prepareDatGUI = (opt) => {
 
   // Set initial values
   DefaultOptions.frameIndex = opt.frameIndex;
+  DefaultOptions.movieFPS = opt.movieFPS;
   initializeSettings();
 
-  const step = 1;
-  optionFolder.add(options, 'frameIndex', 0, 10000, step);
+  optionFolder.add(options, 'frameIndex', 0, 10000, 1);
+  optionFolder.add(options, 'movieFPS', 0, 200, 0.01);
   optionFolder.open();
 
   //  -- Utilities
@@ -40,5 +41,6 @@ const prepareDatGUI = (opt) => {
 // Initialize with default values
 const initializeSettings = () => {
   options.frameIndex = DefaultOptions.frameIndex;
+  options.movieFPS = DefaultOptions.movieFPS;
   gui.updateDisplay();
 };
