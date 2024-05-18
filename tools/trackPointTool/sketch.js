@@ -2,6 +2,7 @@ let myP5MovRec; // Please prepare instance in global
 let img;
 let vd;
 let cvs;
+let movieFPS;
 const points = [];
 const defaultMarkSize = 5;
 const markColor = 'white';
@@ -9,7 +10,7 @@ const markColor = 'white';
 // Options
 const gOptions = {
   frameIndex: 0,
-  movieFPS: 29.97,
+  showCoordinate: false,
 };
 
 function setup() {
@@ -33,7 +34,7 @@ function draw() {
   background(220);
   const opt = gOptions;
   opt.frameIndex = options.frameIndex;
-  opt.movieFPS = options.movieFPS;
+  opt.showCoordinate = options.showCoordinate;
 
   if (img) {
     image(img, 0, 0, img.width, img.height);
@@ -78,26 +79,36 @@ function draw() {
       fill('black');
       textAlign(CENTER, CENTER);
       textSize(width / 24);
-      text('Drag & Drop an image file here.', width / 2, height / 2);
+      text('Drag & Drop image/movie file.', width / 2, height / 2);
     }
     pop();
   }
 
-  if (vd) {
-    const frameIndex = Math.floor(vd.elt.currentTime * options.movieFPS);
-    if (options.frameIndex !== frameIndex) {
+  if (vd && (!vd.elt.paused || vd.elt.seeking)) {
+    const frameIndex = Math.floor(vd.elt.currentTime * movieFPS);
+    if (opt.frameIndex !== frameIndex) {
       options.frameIndex = frameIndex;
-      gui.updateDisplay();
+      opt.frameIndex = frameIndex;
+      setTimeout(() => {
+        gui.updateDisplay();
+      }, 10);
     }
   }
 
-  showCursorCoordinate();
+  if (opt.showCoordinate) {
+    showCursorCoordinate();
+  }
 }
 
 const handleFile = (f) => {
   // console.log(f)
+  
+  if (vd || img) {
+    return;
+  }
 
   if (f.type === 'image') {
+    setImageControls();
     // Remove the current image, if any.
     if (img) {
       img.remove();
@@ -125,11 +136,37 @@ const handleFile = (f) => {
   }
 
   if (f.type === 'video') {
+    const opt = gOptions;
+
+    movieFPS = parseFloat(window.prompt('Input movie fps: ', '29.97'));
+    gui.updateDisplay();
+
     vd = createVideo(f.data, () => {
-      // console.log(vd);
+      vd.parent('forVideo');
+      console.log(vd);
       noCanvas();
+      // vd.hide();
       vd.showControls();
+      // ビデオの縦横サイズを設定
+      const wSize = min(vd.width, windowWidth);
+      // vd.play();
+      // vd.size(windowWidth, windowWidth/vd.width*vd.height);
+      setMovieControls(Math.floor(vd.duration() * movieFPS), onChangeFrameIndex);
+      // resizeCanvas(vd.width, vd.height);
     });
+  }
+};
+
+const onChangeFrameIndex = () => {
+  if (vd) {
+    const opt = gOptions;
+    opt.frameIndex = options.frameIndex;
+    setTimeout(() => {
+      gui.updateDisplay();
+    }, 10);
+
+    const totalFrames = Math.floor(vd.duration() * movieFPS);
+    vd.time((opt.frameIndex / totalFrames) * vd.duration());
   }
 };
 
@@ -171,7 +208,7 @@ function mousePressed() {
     points.forEach((p, index) => {
       let markSize = defaultMarkSize;
       if (dist(p.x, p.y, mouseX, mouseY) < markSize) {
-        if (mouseButton !== LEFT) {
+        if (mouseButton !== LEFT || keyIsDown(CONTROL)) {
           points.splice(index, 1);
         } else {
           draggingPointIdx = index;
@@ -212,6 +249,16 @@ function keyPressed() {
   //     break;
   // }
 }
+
+const selectFrame = () => {
+  vd.pause();
+  vd.hide();
+  deleteMovieControls();
+  setImageControls();
+  createCanvas(vd.width, vd.height);
+  img = vd;
+  vd = undefined;
+};
 
 const downloadData = () => {
   const name = getYYYYMMDD_hhmmss(true) + '.txt';
