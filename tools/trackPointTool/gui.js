@@ -24,7 +24,7 @@ const utilities = {
 };
 
 const prepareDatGUI = (opt) => {
-  gui = new dat.GUI({ closeOnTop: true });
+  gui = new dat.GUI({ closeOnTop: true, hideable: true });
   controlFolder = gui.addFolder('Controls');
 
   // Set initial values
@@ -36,25 +36,30 @@ const prepareDatGUI = (opt) => {
 
   //  -- Appendix
   appendixFolder = gui.addFolder('Appendix');
-  appendixFolder.add(utilities, 'SaveImage');
-  appendixFolder.add(utilities, 'GitHub');
+  appendixFolder.add(utilities, 'SaveImage').name('Save Image');
+  appendixFolder.add(utilities, 'GitHub').name('move To GitHub Repo');
   appendixFolder.close();
 
 
   // gui.close();
 };
 
-const setImageControls = () => {
-  frameIndex = controlFolder.add(options, 'frameIndex', 0, 10000, 1);
-  controlFolder.add(options, 'showCoordinate', false);
-  controlFolder.add(utilities, 'DownloadData');
+const setImageControls = ( maxFrameIndex = 10000, bEnable) => {
+  frameIndex = controlFolder.add(options, 'frameIndex', 0, maxFrameIndex, 1)
+  console.log(frameIndex);
+  if(!bEnable){
+    frameIndex.domElement.hidden = true;
+    frameIndex.name('Frame: ' + options.frameIndex);
+  }
+  controlFolder.add(options, 'showCoordinate', false).name('Show Coordinate');
+  controlFolder.add(utilities, 'DownloadData').name('Download Data');
 }
 
 
 const setMovieControls = (maxFrameIndex = 10000, callback) => {
-  frameIndex = controlFolder.add(options, 'frameIndex', 0, maxFrameIndex, 1);
+  frameIndex = controlFolder.add(options, 'frameIndex', 0, maxFrameIndex, 1).name('Frame Index');
   frameIndex.onChange(callback);
-  selectFrameCtrl = controlFolder.add(utilities, 'SelectFrame');
+  selectFrameCtrl = controlFolder.add(utilities, 'SelectFrame').name('Select Frame');
 }
 
 const deleteMovieControls = () => {

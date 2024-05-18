@@ -98,6 +98,7 @@ function draw() {
   if (opt.showCoordinate) {
     showCursorCoordinate();
   }
+
 }
 
 const handleFile = (f) => {
@@ -108,7 +109,7 @@ const handleFile = (f) => {
   }
 
   if (f.type === 'image') {
-    setImageControls();
+    setImageControls(10000, true);
     // Remove the current image, if any.
     if (img) {
       img.remove();
@@ -254,7 +255,8 @@ const selectFrame = () => {
   vd.pause();
   vd.hide();
   deleteMovieControls();
-  setImageControls();
+  const totalFrames = Math.floor(vd.duration() * movieFPS);
+  setImageControls(totalFrames, false);
   createCanvas(vd.width, vd.height);
   img = vd;
   vd = undefined;
