@@ -21,6 +21,10 @@ const utilities = {
   GitHub: () => {
     window.open('https://github.com/tetunori/co-tracker', '_blank');
   },
+  NoOp: () => {
+    // No Operation
+  },
+
 };
 
 const prepareDatGUI = (opt) => {
@@ -40,6 +44,7 @@ const prepareDatGUI = (opt) => {
   appendixFolder.add(utilities, 'GitHub').name('move To GitHub Repo');
   appendixFolder.close();
 
+  gui.add(utilities, 'NoOp').name('[h] key to hide menu');
 
   // gui.close();
 };
