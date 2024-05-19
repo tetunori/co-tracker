@@ -61,7 +61,7 @@ const setMovieControls = (movieFPS) => {
   controlFolder.add(options, 'frameOffset', -5, 5, 1).name('Frame Offset');
 
   controlFolder.open();
-  hintsFolder.add(utilities, 'NoOp').name('[mouseX]: bg alpha');
-  hintsFolder.add(utilities, 'NoOp').name('[Click]: play/pause');
+  hintsFolder.add(utilities, 'NoOp').name('[Shift + mouseX]: bg alpha');
+  hintsFolder.add(utilities, 'NoOp').name('[Ctrl + Click]: play/pause');
   hintsFolder.open();
 };

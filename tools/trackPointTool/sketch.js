@@ -147,7 +147,7 @@ const handleMovieFile = (f) => {
   gVd = createVideo(f.data, () => {
     // Change layer order for user operation
     noCanvas();
-    gVd.parent('forVideo');
+    // gVd.parent('forVideo');
     gVd.showControls();
     setMovieControls(getFrameIndex(gVd.duration()), onChangeFrameIndex);
   });
