@@ -1,6 +1,7 @@
 // dat GUI instance
 let gui;
 let controlFolder;
+let hintsFolder;
 let frameIndex;
 let selectFrameCtrl;
 
@@ -39,13 +40,15 @@ const prepareDatGUI = (opt) => {
   controlFolder.open();
 
   // Appendix
-  appendixFolder = gui.addFolder('Appendix');
+  const appendixFolder = gui.addFolder('Appendix');
   appendixFolder.add(utilities, 'SaveImage').name('Save Image');
   appendixFolder.add(utilities, 'GitHub').name('move To GitHub Repo');
   appendixFolder.close();
 
-  // Help text
-  gui.add(utilities, 'NoOp').name('[h] key to hide menu');
+  // Hint text
+  hintsFolder = gui.addFolder('Hints');
+  hintsFolder.add(utilities, 'NoOp').name('[H] key to hide menu');
+  hintsFolder.open();
 };
 
 const setImageControls = (maxFrameIndex = 10000, bEnable) => {
@@ -56,7 +59,12 @@ const setImageControls = (maxFrameIndex = 10000, bEnable) => {
   }
   controlFolder.add(options, 'showCoordinate', false).name('Show Coordinate');
   controlFolder.add(utilities, 'DownloadData').name('Download Data');
+  hintsFolder.add(utilities, 'NoOp').name('[Click] Add');
+  hintsFolder.add(utilities, 'NoOp').name('[Drag & Drop] Move');
+  hintsFolder.add(utilities, 'NoOp').name('[Ctrl + Click] Remove');
+  hintsFolder.add(utilities, 'NoOp').name('[Ctrl + Z/Y] History');
   controlFolder.open();
+  hintsFolder.open();
 };
 
 const setMovieControls = (maxFrameIndex = 10000, callback) => {
