@@ -2,7 +2,9 @@
 let gImg;
 let gVd;
 let gMovieFPS;
-const gPoints = [];
+let gPoints = [];
+const gPointsHistory = [[]];
+let gPointsHistoryIndex = 0;
 
 let draggingPointIdx = undefined;
 
@@ -166,6 +168,8 @@ const handleTextFile = (f) => {
   dataArray.forEach((e, i) => {
     if (i > 2 && i % 3 === 0) {
       gPoints.push({ x: Number(dataArray[i]), y: Number(dataArray[i + 1]) });
+      gPointsHistoryIndex = gPointsHistory.length - 1;
+      gPointsHistory.push([...gPoints]);
     }
   });
 };
@@ -213,6 +217,8 @@ function mousePressed() {
         if (mouseButton !== LEFT || keyIsDown(CONTROL)) {
           // Delete this point
           gPoints.splice(index, 1);
+          gPointsHistoryIndex++;
+          gPointsHistory.push([...gPoints]);
         } else {
           draggingPointIdx = index;
         }
@@ -224,6 +230,12 @@ function mousePressed() {
       if (mouseButton === LEFT) {
         // Add this point
         gPoints.push({ x: mouseX, y: mouseY });
+        gPointsHistoryIndex++;
+        if(gPointsHistoryIndex === gPointsHistory.length){
+          gPointsHistory.push([...gPoints]);
+        }else{
+          gPointsHistory[gPointsHistoryIndex] = [...gPoints];
+        }
       }
     }
   }
@@ -232,13 +244,22 @@ function mousePressed() {
 function mouseReleased() {
   if (draggingPointIdx !== undefined) {
     gPoints[draggingPointIdx] = { x: mouseX, y: mouseY };
+    gPointsHistory.push([...gPoints]);
+    gPointsHistoryIndex++;
     draggingPointIdx = undefined;
   }
 }
 
 function keyPressed() {
   if (keyIsDown(CONTROL) && key == 'z') {
-    gPoints.pop();
+    if(gPointsHistoryIndex > 0){
+      gPoints.length = 0;
+      gPoints = [...gPointsHistory[gPointsHistoryIndex - 1]];
+      gPointsHistoryIndex--;
+      console.log(gPoints)
+    }
+  } else if (keyIsDown(CONTROL) && key == 'y') {
+    // gPoints.pop();
   }
 
   // switch (keyCode) {
@@ -255,7 +276,6 @@ function keyPressed() {
 }
 
 const selectFrame = () => {
-
   // Stop & hide video
   gVd.pause();
   gVd.hide();
@@ -291,4 +311,3 @@ const outputScript = (name, text) => {
   a.remove();
   URL.revokeObjectURL(url);
 };
-
