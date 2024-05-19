@@ -1,29 +1,29 @@
-let myP5MovRec; // Please prepare instance in global
-let img;
-let vd;
-let cvs;
-let movieFPS;
-const points = [];
-const defaultMarkSize = 5;
-const markColor = 'white';
+// let myP5MovRec; // Please prepare instance in global
+let gImg;
+let gVd;
+let gMovieFPS;
+const gPoints = [];
 
-// Options
-const gOptions = {
-  frameIndex: 0,
-  showCoordinate: false,
-};
+let draggingPointIdx = undefined;
+
+const defaultMarkSize = 5;
+const markFillColor = 'white';
+const markHighlightFillColor = 'red';
+const markStrokeColor = 'black';
 
 function setup() {
   // Prepare GUI
-  prepareDatGUI(gOptions);
+  const initOpstion = {
+    frameIndex: 0,
+    showCoordinate: false,
+  };
+  prepareDatGUI(initOpstion);
 
-  cvs = createCanvas(windowWidth, windowHeight);
-  cvs.drop(handleFile);
+  createCanvas(windowWidth, windowHeight).drop(handleFile);
 
   textFont('Noto Sans JP');
-  fill(markColor);
-  stroke('black');
-  strokeWeight(1);
+  fill(markFillColor);
+  stroke(markStrokeColor);
   textAlign(LEFT, CENTER);
 
   // myP5MovRec = new P5MovRec(); // P5MovRec.codecId.vp9 is selected by default.
@@ -32,43 +32,57 @@ function setup() {
 
 function draw() {
   background(220);
-  const opt = gOptions;
-  opt.frameIndex = options.frameIndex;
-  opt.showCoordinate = options.showCoordinate;
 
-  if (img) {
-    image(img, 0, 0, img.width, img.height);
+  if (gImg) {
+    // Marking mode if image is already set
+    image(gImg, 0, 0, gImg.width, gImg.height);
 
-    points.forEach((p, index) => {
+    // Draw marks
+    gPoints.forEach((p, index) => {
       let markSize = defaultMarkSize;
-      if (index === draggingPointIdx) {
-        markSize *= 2;
-        push();
-        {
-          fill('red');
-          circle(mouseX, mouseY, markSize);
+      let xPos = p.x;
+      let yPos = p.y;
+      push();
+      {
+        if (index === draggingPointIdx) {
+          // The dragging point
+          xPos = mouseX;
+          yPos = mouseY;
+          markSize *= 2;
+          fill(markHighlightFillColor);
+        } else if (dist(p.x, p.y, mouseX, mouseY) < markSize) {
+          // Points near mouse coordinate
+          markSize *= 2;
+          fill(markHighlightFillColor);
         }
-        pop();
-        text(index, mouseX + defaultMarkSize * 2, mouseY);
-      } else if (dist(p.x, p.y, mouseX, mouseY) < markSize) {
-        markSize *= 2;
-        push();
-        {
-          fill('red');
-          circle(p.x, p.y, markSize);
-        }
-        pop();
-        text(index, p.x + defaultMarkSize * 2, p.y);
-      } else {
-        circle(p.x, p.y, markSize);
-        text(index, p.x + defaultMarkSize * 2, p.y);
+        circle(xPos, yPos, markSize);
+        text(index, xPos + defaultMarkSize * 2, yPos);
       }
+      pop();
     });
+
+    if (options.showCoordinate) {
+      showCursorCoordinate();
+    }
+  } else if (gVd) {
+    // Selecting frame mode if video is set
+    // In this mode, only to control frame index on canvas
+    if (!gVd.elt.paused || gVd.elt.seeking) {
+      const frameIndex = getFrameIndex(gVd.elt.currentTime);
+      if (options.frameIndex !== frameIndex) {
+        options.frameIndex = frameIndex;
+        setTimeout(() => {
+          gui.updateDisplay();
+        }, 10);
+      }
+    }
   } else {
+    // Initial screen let user to drop an image/movie file.
     push();
     {
       push();
       {
+        // Draw dotted rectangle
         fill('#ffffff70');
         strokeCap(ROUND);
         drawingContext.setLineDash([1, 10]);
@@ -76,6 +90,8 @@ function draw() {
         rect(width / 8, height / 4, (3 * width) / 4, height / 2, 20);
       }
       pop();
+
+      // Draw text for operation
       fill('black');
       textAlign(CENTER, CENTER);
       textSize(width / 24);
@@ -83,92 +99,79 @@ function draw() {
     }
     pop();
   }
-
-  if (vd && (!vd.elt.paused || vd.elt.seeking)) {
-    const frameIndex = Math.floor(vd.elt.currentTime * movieFPS);
-    if (opt.frameIndex !== frameIndex) {
-      options.frameIndex = frameIndex;
-      opt.frameIndex = frameIndex;
-      setTimeout(() => {
-        gui.updateDisplay();
-      }, 10);
-    }
-  }
-
-  if (opt.showCoordinate) {
-    showCursorCoordinate();
-  }
-
 }
 
 const handleFile = (f) => {
   // console.log(f)
-  
-  if (vd || img) {
+
+  if (gVd || gImg) {
     return;
   }
 
   if (f.type === 'image') {
-    setImageControls(10000, true);
-    // Remove the current image, if any.
-    if (img) {
-      img.remove();
-    }
-    // Create an  element with the
-    // dropped file.
-    img = createImg(f.data, '', '', () => {
-      resizeCanvas(img.width, img.height);
-    });
-    img.hide();
+    handleImageFile(f);
   }
 
   if (f.type === 'text') {
-    let dataText = f.data.replaceAll('.', '');
-    dataText = dataText.replaceAll(']', '');
-    dataText = dataText.replaceAll(' ', '');
-    const dataArray = dataText.split(',');
-
-    points.length = 0;
-    dataArray.forEach((e, i) => {
-      if (i > 2 && i % 3 === 0) {
-        points.push({ x: Number(dataArray[i]), y: Number(dataArray[i + 1]) });
-      }
-    });
+    handleTextFile(f);
   }
 
   if (f.type === 'video') {
-    const opt = gOptions;
-
-    movieFPS = parseFloat(window.prompt('Input movie fps: ', '29.97'));
-    gui.updateDisplay();
-
-    vd = createVideo(f.data, () => {
-      vd.parent('forVideo');
-      console.log(vd);
-      noCanvas();
-      // vd.hide();
-      vd.showControls();
-      // ビデオの縦横サイズを設定
-      const wSize = min(vd.width, windowWidth);
-      // vd.play();
-      // vd.size(windowWidth, windowWidth/vd.width*vd.height);
-      setMovieControls(Math.floor(vd.duration() * movieFPS), onChangeFrameIndex);
-      // resizeCanvas(vd.width, vd.height);
-    });
+    handleMovieFile(f);
   }
 };
 
-const onChangeFrameIndex = () => {
-  if (vd) {
-    const opt = gOptions;
-    opt.frameIndex = options.frameIndex;
-    setTimeout(() => {
-      gui.updateDisplay();
-    }, 10);
+const handleImageFile = (f) => {
+  const maxFrameIndex = 10000;
+  setImageControls(maxFrameIndex, true);
 
-    const totalFrames = Math.floor(vd.duration() * movieFPS);
-    vd.time((opt.frameIndex / totalFrames) * vd.duration());
+  // Remove the current image, if any.
+  if (gImg) {
+    gImg.remove();
   }
+
+  gImg = createImg(f.data, '', '', () => {
+    resizeCanvas(gImg.width, gImg.height);
+  });
+  gImg.hide();
+};
+
+const handleMovieFile = (f) => {
+  // Set fps value by user
+  gMovieFPS = parseFloat(window.prompt('Input movie fps: ', '29.97'));
+
+  gVd = createVideo(f.data, () => {
+    // Change layer order for user operation
+    noCanvas();
+    gVd.parent('forVideo');
+    gVd.showControls();
+    setMovieControls(getFrameIndex(gVd.duration()), onChangeFrameIndex);
+  });
+};
+
+const onChangeFrameIndex = () => {
+  if (gVd) {
+    const totalFrames = getFrameIndex(gVd.duration());
+    gVd.time((options.frameIndex / totalFrames) * gVd.duration());
+  }
+};
+
+const handleTextFile = (f) => {
+  let dataText = f.data.replaceAll('.', '');
+  dataText = dataText.replaceAll(']', '');
+  dataText = dataText.replaceAll(' ', '');
+  const dataArray = dataText.split(',');
+
+  gPoints.length = 0;
+  dataArray.forEach((e, i) => {
+    if (i > 2 && i % 3 === 0) {
+      gPoints.push({ x: Number(dataArray[i]), y: Number(dataArray[i + 1]) });
+    }
+  });
+};
+
+const getFrameIndex = (frameTime) => {
+  return Math.floor(frameTime * gMovieFPS);
 };
 
 const showCursorCoordinate = () => {
@@ -197,20 +200,19 @@ const showCursorCoordinate = () => {
   pop();
 };
 
-let draggingPointIdx = undefined;
-
 function mousePressed() {
-  if (!img) {
+  if (!gImg) {
     return;
   }
 
   if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
     let isFoundExistingPoint = false;
-    points.forEach((p, index) => {
+    gPoints.forEach((p, index) => {
       let markSize = defaultMarkSize;
       if (dist(p.x, p.y, mouseX, mouseY) < markSize) {
         if (mouseButton !== LEFT || keyIsDown(CONTROL)) {
-          points.splice(index, 1);
+          // Delete this point
+          gPoints.splice(index, 1);
         } else {
           draggingPointIdx = index;
         }
@@ -220,7 +222,8 @@ function mousePressed() {
 
     if (!isFoundExistingPoint) {
       if (mouseButton === LEFT) {
-        points.push({ x: mouseX, y: mouseY });
+        // Add this point
+        gPoints.push({ x: mouseX, y: mouseY });
       }
     }
   }
@@ -228,14 +231,14 @@ function mousePressed() {
 
 function mouseReleased() {
   if (draggingPointIdx !== undefined) {
-    points[draggingPointIdx] = { x: mouseX, y: mouseY };
+    gPoints[draggingPointIdx] = { x: mouseX, y: mouseY };
     draggingPointIdx = undefined;
   }
 }
 
 function keyPressed() {
   if (keyIsDown(CONTROL) && key == 'z') {
-    points.pop();
+    gPoints.pop();
   }
 
   // switch (keyCode) {
@@ -252,22 +255,27 @@ function keyPressed() {
 }
 
 const selectFrame = () => {
-  vd.pause();
-  vd.hide();
+
+  // Stop & hide video
+  gVd.pause();
+  gVd.hide();
+
+  // Reload gui dat
   deleteMovieControls();
-  const totalFrames = Math.floor(vd.duration() * movieFPS);
+  const totalFrames = getFrameIndex(gVd.duration());
   setImageControls(totalFrames, false);
-  createCanvas(vd.width, vd.height);
-  img = vd;
-  vd = undefined;
+
+  // Prepare p5.js canvas
+  createCanvas(gVd.width, gVd.height);
+  gImg = gVd;
+  gVd = undefined;
 };
 
 const downloadData = () => {
   const name = getYYYYMMDD_hhmmss(true) + '.txt';
   let dataText = '    # [frameIdx, xPos, yPos] \n';
-  points.forEach((p, index) => {
-    dataText +=
-      '    [' + gOptions.frameIndex + '., ' + p.x + '., ' + p.y + '.],  # ' + index + '\n';
+  gPoints.forEach((p, index) => {
+    dataText += '    [' + options.frameIndex + '., ' + p.x + '., ' + p.y + '.],  # ' + index + '\n';
   });
   outputScript(name, dataText);
 };
@@ -284,6 +292,3 @@ const outputScript = (name, text) => {
   URL.revokeObjectURL(url);
 };
 
-document.oncontextmenu = (e) => {
-  e.preventDefault();
-};
