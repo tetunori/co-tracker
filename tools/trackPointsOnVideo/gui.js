@@ -27,6 +27,7 @@ const prepareDatGUI = (opt) => {
   options.frameIndex = opt.frameIndex;
   options.dataFPS = opt.dataFPS;
   options.movieFPS = opt.movieFPS;
+  options.frameOffset = opt.frameOffset;
   gui.updateDisplay();
 
   // Controls
@@ -57,6 +58,8 @@ const setMovieControls = (movieFPS) => {
   const movFPS = controlFolder.add(options, 'movieFPS', 0, movieFPS, 1);
   movFPS.domElement.hidden = true;
   movFPS.name('Mov FPS: ' + movieFPS);
+  controlFolder.add(options, 'frameOffset', -5, 5, 1).name('Frame Offset');
+
   controlFolder.open();
   hintsFolder.add(utilities, 'NoOp').name('[mouseX]: bg alpha');
   hintsFolder.add(utilities, 'NoOp').name('[Click]: play/pause');

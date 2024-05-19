@@ -5,7 +5,7 @@ let gPoints = [];
 let gPointsHistoryIndex = 0;
 let gIsPlaying = false;
 
-const markSize = 5;
+const markSize = 8;
 const markFillColor = 'white';
 const markStrokeColor = 'black';
 
@@ -15,6 +15,7 @@ function setup() {
     frameIndex: 0,
     dataFPS: 0,
     movieFPS: 0,
+    frameOffset: 0,
   };
   prepareDatGUI(initOpstion);
 
@@ -43,17 +44,24 @@ function draw() {
 
     image(gVd, 0, 0, gVd.width, gVd.height);
 
-    let blackLayerColor = color('black');
-    blackLayerColor.setAlpha(floor(map(mouseX, 0, width, 0, 255)));
+    let blackLayerColor = color('#00000000');
+    if(keyIsDown(SHIFT)){
+      blackLayerColor.setAlpha(floor(map(mouseX, 0, width, 0, 255)));
+    }
     background(blackLayerColor);
 
     // Draw marks
-    if (gPoints.length > frameIndex) {
-      gPoints[frameIndex].forEach((p) => {
-        let xPos = p.x;
-        let yPos = p.y;
+    const offsetFrameIndex = frameIndex + options.frameOffset;
+    const frameIndexForData = floor(offsetFrameIndex * options.dataFPS / options.movieFPS );
+    // console.log(gPoints.length, frameIndexForData)
+    if (gPoints.length > frameIndexForData + 1) {
+      gPoints[frameIndexForData].forEach((p) => {
+        const nextElm = gPoints[frameIndexForData + 1][p.pointIdx];
+        let xPos = lerp(p.x, nextElm.x, fract(offsetFrameIndex / options.movieFPS * options.dataFPS)); //fract((frameCount - 1) / (options.movieFPS / options.dataFPS)));
+        let yPos = lerp(p.y, nextElm.y, fract(offsetFrameIndex / options.movieFPS * options.dataFPS)); //fract((frameCount - 1) / (options.movieFPS / options.dataFPS)));
+        // console.log(xPos, yPos)
         circle(xPos, yPos, markSize);
-        text(p.pointIdx, xPos + markSize * 2, yPos);
+        // text(p.pointIdx, xPos + markSize * 2, yPos);
       });
     }
   } else {
@@ -146,12 +154,14 @@ const getFrameIndex = (frameTime) => {
 };
 
 function mousePressed() {
-  if (gIsPlaying) {
-    gVd?.pause();
-    gIsPlaying = false;
-  } else {
-    gVd?.play();
-    gIsPlaying = true;
+  if (keyIsDown(CONTROL)) {
+    if (gIsPlaying) {
+      gVd?.pause();
+      gIsPlaying = false;
+    } else {
+      gVd?.play();
+      gIsPlaying = true;
+    }
   }
 }
 
