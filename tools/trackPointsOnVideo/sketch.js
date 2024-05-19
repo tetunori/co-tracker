@@ -46,12 +46,14 @@ function draw() {
     background(blackLayerColor);
 
     // Draw marks
-    gPoints.forEach((p, index) => {
-      let xPos = p.x;
-      let yPos = p.y;
-      circle(xPos, yPos, markSize);
-      text(index, xPos + markSize * 2, yPos);
-    });
+    if (gPoints.length > frameIndex) {
+      gPoints[frameIndex].forEach((p) => {
+        let xPos = p.x;
+        let yPos = p.y;
+        circle(xPos, yPos, markSize);
+        text(p.pointIdx, xPos + markSize * 2, yPos);
+      });
+    }
   } else {
     // Initial screen let user to drop an image/movie file.
     push();
@@ -96,6 +98,7 @@ const handleMovieFile = (f) => {
   gVd = createVideo(f.data, () => {
     // Change layer order for user operation
     // gVd.parent('forVideo');
+    resizeCanvas(gVd.width, gVd.height);
     gVd.hide();
     gVd.play();
     gIsPlaying = true;
@@ -112,17 +115,27 @@ const onChangeFrameIndex = () => {
 };
 
 const handleTextFile = (f) => {
-  let dataText = f.data.replaceAll('.', '');
-  dataText = dataText.replaceAll(']', '');
-  dataText = dataText.replaceAll(' ', '');
+  let dataText = f.data.replaceAll('\r\n', ',');
+  dataText = dataText.replaceAll('y', '');
   const dataArray = dataText.split(',');
+  // console.log(dataArray);
 
   gPoints.length = 0;
   dataArray.forEach((e, i) => {
-    if (i > 2 && i % 3 === 0) {
-      gPoints.push({ x: Number(dataArray[i]), y: Number(dataArray[i + 1]) });
+    if (i > 1 && i < dataArray.length - 1 && i % 4 === 0) {
+      const pushObj = {
+        pointIdx: Number(dataArray[i + 1]),
+        x: Number(dataArray[i + 2]),
+        y: Number(dataArray[i + 3]),
+      };
+      if (gPoints.length === Number(dataArray[i]) + 1) {
+        gPoints[dataArray[i]].push(pushObj);
+      } else {
+        gPoints.push([pushObj]);
+      }
     }
   });
+  // console.log(gPoints);
 };
 
 const getFrameIndex = (frameTime) => {
