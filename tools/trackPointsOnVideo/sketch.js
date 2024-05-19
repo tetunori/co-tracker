@@ -13,6 +13,8 @@ function setup() {
   // Prepare GUI
   const initOpstion = {
     frameIndex: 0,
+    dataFPS: 0,
+    movieFPS: 0,
   };
   prepareDatGUI(initOpstion);
 
@@ -103,6 +105,7 @@ const handleMovieFile = (f) => {
     gVd.play();
     gIsPlaying = true;
     gVd.loop();
+    setMovieControls(gMovieFPS);
     setframeIndex(getFrameIndex(gVd.duration()), onChangeFrameIndex);
   });
 };
