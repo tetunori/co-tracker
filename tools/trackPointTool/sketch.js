@@ -106,16 +106,18 @@ function draw() {
 const handleFile = (f) => {
   // console.log(f)
 
+  if (gImg) {
+    if (f.type === 'text') {
+      handleTextFile(f);
+    }
+  }
+
   if (gVd || gImg) {
     return;
   }
 
   if (f.type === 'image') {
     handleImageFile(f);
-  }
-
-  if (f.type === 'text') {
-    handleTextFile(f);
   }
 
   if (f.type === 'video') {
@@ -168,8 +170,7 @@ const handleTextFile = (f) => {
   dataArray.forEach((e, i) => {
     if (i > 2 && i % 3 === 0) {
       gPoints.push({ x: Number(dataArray[i]), y: Number(dataArray[i + 1]) });
-      gPointsHistoryIndex = gPointsHistory.length - 1;
-      gPointsHistory.push([...gPoints]);
+      addPointsHistory();
     }
   });
 };
@@ -217,12 +218,7 @@ function mousePressed() {
         if (mouseButton !== LEFT || keyIsDown(CONTROL)) {
           // Delete this point
           gPoints.splice(index, 1);
-          gPointsHistoryIndex++;
-          if (gPointsHistoryIndex === gPointsHistory.length) {
-            gPointsHistory.push([...gPoints]);
-          } else {
-            gPointsHistory[gPointsHistoryIndex] = [...gPoints];
-          }
+          addPointsHistory();
         } else {
           draggingPointIdx = index;
         }
@@ -234,12 +230,7 @@ function mousePressed() {
       if (mouseButton === LEFT) {
         // Add this point
         gPoints.push({ x: mouseX, y: mouseY });
-        gPointsHistoryIndex++;
-        if (gPointsHistoryIndex === gPointsHistory.length) {
-          gPointsHistory.push([...gPoints]);
-        } else {
-          gPointsHistory[gPointsHistoryIndex] = [...gPoints];
-        }
+        addPointsHistory();
       }
     }
   }
@@ -248,15 +239,19 @@ function mousePressed() {
 function mouseReleased() {
   if (draggingPointIdx !== undefined) {
     gPoints[draggingPointIdx] = { x: mouseX, y: mouseY };
-    gPointsHistoryIndex++;
-    if (gPointsHistoryIndex === gPointsHistory.length) {
-      gPointsHistory.push([...gPoints]);
-    } else {
-      gPointsHistory[gPointsHistoryIndex] = [...gPoints];
-    }
+    addPointsHistory();
     draggingPointIdx = undefined;
   }
 }
+
+const addPointsHistory = () => {
+  gPointsHistoryIndex++;
+  if (gPointsHistoryIndex === gPointsHistory.length) {
+    gPointsHistory.push([...gPoints]);
+  } else {
+    gPointsHistory[gPointsHistoryIndex] = [...gPoints];
+  }
+};
 
 function keyPressed() {
   if (keyIsDown(CONTROL) && key == 'z') {
@@ -264,14 +259,12 @@ function keyPressed() {
       gPointsHistoryIndex--;
       gPoints.length = 0;
       gPoints = [...gPointsHistory[gPointsHistoryIndex]];
-      console.log(gPoints);
     }
   } else if (keyIsDown(CONTROL) && key == 'y') {
     if (gPointsHistoryIndex < gPointsHistory.length - 1) {
       gPointsHistoryIndex++;
       gPoints.length = 0;
       gPoints = [...gPointsHistory[gPointsHistoryIndex]];
-      console.log(gPoints);
     }
   }
 
