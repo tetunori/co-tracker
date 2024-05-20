@@ -32,7 +32,6 @@ function setup() {
 
 function draw() {
   background(220);
-
   if (gVd) {
     const frameIndex = getFrameIndex(gVd.elt.currentTime);
     if (options.frameIndex !== frameIndex) {
@@ -51,14 +50,13 @@ function draw() {
     background(blackLayerColor);
 
     // Draw marks
-    const offsetFrameIndex = frameIndex + options.frameOffset;
-    const frameIndexForData = floor(offsetFrameIndex * options.dataFPS / options.movieFPS );
-    // console.log(gPoints.length, frameIndexForData)
+    const frameIndexForData = floor(frameIndex * options.dataFPS / options.movieFPS );
+    // console.log(frameIndexForData)
     if (gPoints.length > frameIndexForData + 1) {
       gPoints[frameIndexForData].forEach((p) => {
         const nextElm = gPoints[frameIndexForData + 1][p.pointIdx];
-        let xPos = lerp(p.x, nextElm.x, fract(offsetFrameIndex / options.movieFPS * options.dataFPS)); //fract((frameCount - 1) / (options.movieFPS / options.dataFPS)));
-        let yPos = lerp(p.y, nextElm.y, fract(offsetFrameIndex / options.movieFPS * options.dataFPS)); //fract((frameCount - 1) / (options.movieFPS / options.dataFPS)));
+        let xPos = lerp(p.x, nextElm.x, fract(frameIndex / options.movieFPS * options.dataFPS)); //fract((frameCount - 1) / (options.movieFPS / options.dataFPS)));
+        let yPos = lerp(p.y, nextElm.y, fract(frameIndex / options.movieFPS * options.dataFPS)); //fract((frameCount - 1) / (options.movieFPS / options.dataFPS)));
         // console.log(xPos, yPos)
         circle(xPos, yPos, markSize);
         // text(p.pointIdx, xPos + markSize * 2, yPos);
@@ -87,6 +85,7 @@ function draw() {
     }
     pop();
   }
+
 }
 
 const handleFile = (f) => {
@@ -121,7 +120,7 @@ const handleMovieFile = (f) => {
 const onChangeFrameIndex = () => {
   if (gVd) {
     const totalFrames = getFrameIndex(gVd.duration());
-    gVd.time((options.frameIndex / totalFrames) * gVd.duration());
+    gVd.time(ceil(100000*(options.frameIndex / totalFrames) * gVd.duration())/100000);
   }
 };
 
