@@ -10,7 +10,7 @@ let draggingPointIdx = undefined;
 
 const defaultMarkSize = 5;
 const markFillColor = 'white';
-const markHighlightFillColor = 'red';
+const markHighlightFillColor = '#ffbe0b';
 const markStrokeColor = 'black';
 
 function setup() {
@@ -19,6 +19,7 @@ function setup() {
     frameIndex: 0,
     showCoordinate: false,
     showIndexNumber: true,
+    overlayColor: '#00000000',
   };
   prepareDatGUI(initOpstion);
 
@@ -40,9 +41,17 @@ function draw() {
     // Marking mode if image is already set
     image(gImg, 0, 0, gImg.width, gImg.height);
 
+    // Overlay for higher visibility
+    push()
+    noStroke()
+    fill(options.overlayColor)
+    rect(0,0,width,height);
+    pop()
+
     // Draw marks
     gPoints.forEach((p, index) => {
       let markSize = defaultMarkSize;
+      let xIndexTextOffset = defaultMarkSize * 2;
       let xPos = p.x;
       let yPos = p.y;
       push();
@@ -52,15 +61,17 @@ function draw() {
           xPos = mouseX;
           yPos = mouseY;
           markSize *= 2;
+          textSize(textSize()*2)
           fill(markHighlightFillColor);
         } else if (dist(p.x, p.y, mouseX, mouseY) < markSize) {
           // Points near mouse coordinate
           markSize *= 2;
+          textSize(textSize()*2)
           fill(markHighlightFillColor);
         }
         circle(xPos, yPos, markSize);
         if (options.showIndexNumber) {
-          text(index, xPos + defaultMarkSize * 2, yPos);
+          text(index, xPos + xIndexTextOffset, yPos);
         }
       }
       pop();
@@ -307,8 +318,38 @@ const selectFrame = () => {
 const downloadData = () => {
   const name = getYYYYMMDD_hhmmss(true) + '.txt';
   let dataText = '    # [frameIdx, xPos, yPos] \n';
+
+  // Find max digits
+  let xMaxDigits = 0;
+  let yMaxDigits = 0;
+  xMaxDigits = String(
+    Math.max.apply(
+      null,
+      gPoints.map((e) => {
+        return e.x;
+      })
+    )
+  ).length;
+  yMaxDigits = String(
+    Math.max.apply(
+      null,
+      gPoints.map((e) => {
+        return e.y;
+      })
+    )
+  ).length;
+
   gPoints.forEach((p, index) => {
-    dataText += '    [' + options.frameIndex + '., ' + p.x + '., ' + p.y + '.],  # ' + index + '\n';
+    dataText +=
+      '    [' +
+      options.frameIndex +
+      '., ' +
+      p.x.toString().padStart(xMaxDigits, ' ') +
+      '., ' +
+      p.y.toString().padStart(yMaxDigits, ' ') +
+      '.],  # ' +
+      index.toString().padStart(String(gPoints.length - 1).length, '0') +
+      '\n';
   });
   outputScript(name, dataText);
 };
