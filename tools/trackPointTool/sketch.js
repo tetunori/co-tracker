@@ -8,6 +8,8 @@ let gPointsHistoryIndex = 0;
 
 let draggingPointIdx = undefined;
 
+let gFrameCountOnCopied = undefined;
+
 const defaultMarkSize = 5;
 const markFillColor = 'white';
 const markHighlightFillColor = '#ffbe0b';
@@ -42,11 +44,11 @@ function draw() {
     image(gImg, 0, 0, gImg.width, gImg.height);
 
     // Overlay for higher visibility
-    push()
-    noStroke()
-    fill(options.overlayColor)
-    rect(0,0,width,height);
-    pop()
+    push();
+    noStroke();
+    fill(options.overlayColor);
+    rect(0, 0, width, height);
+    pop();
 
     // Draw marks
     gPoints.forEach((p, index) => {
@@ -61,12 +63,12 @@ function draw() {
           xPos = mouseX;
           yPos = mouseY;
           markSize *= 2;
-          textSize(textSize()*2)
+          textSize(textSize() * 2);
           fill(markHighlightFillColor);
         } else if (dist(p.x, p.y, mouseX, mouseY) < markSize) {
           // Points near mouse coordinate
           markSize *= 2;
-          textSize(textSize()*2)
+          textSize(textSize() * 2);
           fill(markHighlightFillColor);
         }
         circle(xPos, yPos, markSize);
@@ -79,6 +81,26 @@ function draw() {
 
     if (options.showCoordinate) {
       showCursorCoordinate();
+    }
+
+    if (gFrameCountOnCopied) {
+      if (frameCount - gFrameCountOnCopied < 80) {
+        push();
+        {
+          // Draw 'Copied' text
+          fill('#000000A0');
+          strokeCap(ROUND);
+          noStroke();
+          rectMode(CENTER)
+          rect(width / 2, height / 2, width / 4, height / 4, 20);
+
+          fill('white');
+          textAlign(CENTER, CENTER);
+          textSize(width / 24);
+          text('Copied!', width / 2, height / 2);
+        }
+        pop();
+      }
     }
   } else if (gVd) {
     // Selecting frame mode if video is set
@@ -317,7 +339,7 @@ const selectFrame = () => {
 
 const downloadData = () => {
   const name = getYYYYMMDD_hhmmss(true) + '.txt';
-  let dataText = '    # [frameIdx, xPos, yPos] \n';
+  let dataText = '';
 
   // Find max digits
   let xMaxDigits = 0;
@@ -351,7 +373,13 @@ const downloadData = () => {
       index.toString().padStart(String(gPoints.length - 1).length, '0') +
       '\n';
   });
-  outputScript(name, dataText);
+
+  navigator.clipboard.writeText(dataText);
+
+  const prefix = '    # [frameIdx, xPos, yPos] \n';
+  outputScript(name, prefix + dataText);
+
+  gFrameCountOnCopied = frameCount;
 };
 
 const outputScript = (name, text) => {

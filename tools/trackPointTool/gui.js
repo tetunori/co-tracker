@@ -70,7 +70,7 @@ const setImageControls = (maxFrameIndex = 10000, bEnable) => {
       'Translucent White': '#ffffff80',
     })
     .name('Overlay Color').setValue('#00000000');
-  controlFolder.add(utilities, 'DownloadData').name('Download Data');
+  controlFolder.add(utilities, 'DownloadData').name('Copy & Download Data');
   hintsFolder.add(utilities, 'NoOp').name('[Click] Add');
   hintsFolder.add(utilities, 'NoOp').name('[Drag & Drop] Move');
   hintsFolder.add(utilities, 'NoOp').name('[Ctrl + Click] Remove');
