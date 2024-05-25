@@ -4,6 +4,11 @@ let controlFolder;
 let hintsFolder;
 let frameIndex;
 let selectFrameCtrl;
+let showCoordinate;
+let showIndexNumber;
+let overlayColor;
+let copyDownloadData;
+let backToMovieCtrl;
 
 // Setting values for dat GUI
 const options = new Object();
@@ -11,6 +16,9 @@ const options = new Object();
 const utilities = {
   SelectFrame: () => {
     selectFrame();
+  },
+  BackToMovie: () => {
+    backToMovie();
   },
   DownloadData: () => {
     downloadData();
@@ -59,18 +67,19 @@ const setImageControls = (maxFrameIndex = 10000, bEnable) => {
     frameIndex.domElement.hidden = true;
     frameIndex.name('Frame: ' + options.frameIndex);
   }
-  controlFolder.add(options, 'showCoordinate', false).name('Show Coordinate');
-  controlFolder.add(options, 'showIndexNumber', true).name('Show Index');
-  controlFolder
+  showCoordinate = controlFolder.add(options, 'showCoordinate', false).name('Show Coordinate');
+  showIndexNumber = controlFolder.add(options, 'showIndexNumber', true).name('Show Index');
+  overlayColor = controlFolder
     .add(options, 'overlayColor', {
-      'None': '#00000000',
+      None: '#00000000',
       'Opaque Black': '#000000C0',
       'Translucent Black': '#00000080',
       'Opaque White': '#ffffffC0',
       'Translucent White': '#ffffff80',
     })
-    .name('Overlay Color').setValue('#00000000');
-  controlFolder.add(utilities, 'DownloadData').name('Copy & Download Data');
+    .name('Overlay Color')
+    .setValue('#00000000');
+  copyDownloadData = controlFolder.add(utilities, 'DownloadData').name('Copy & Download Data');
   hintsFolder.add(utilities, 'NoOp').name('[Click] Add');
   hintsFolder.add(utilities, 'NoOp').name('[Drag & Drop] Move');
   hintsFolder.add(utilities, 'NoOp').name('[Ctrl + Click] Remove');
@@ -92,8 +101,26 @@ const deleteMovieControls = () => {
   controlFolder.remove(selectFrameCtrl);
 };
 
+const deleteImageControls = () => {
+  controlFolder.remove(frameIndex);
+  controlFolder.remove(showCoordinate);
+  controlFolder.remove(showIndexNumber);
+  controlFolder.remove(overlayColor);
+  controlFolder.remove(copyDownloadData);
+  controlFolder.remove(backToMovieCtrl);
+  gui.removeFolder(hintsFolder)
+  hintsFolder = gui.addFolder('Hints');
+  hintsFolder.add(utilities, 'NoOp').name('[H] key to hide menu');
+  hintsFolder.open();
+
+};
+
 const setGuiPos = (x, y) => {
   gui.domElement.style.left = x + 'px';
   gui.domElement.style.top = y + 'px';
   gui.domElement.style.position = 'absolute';
+};
+
+const setBackToMovie = () => {
+  backToMovieCtrl = controlFolder.add(utilities, 'BackToMovie', true).name('Back to Movie');
 };

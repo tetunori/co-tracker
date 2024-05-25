@@ -1,6 +1,6 @@
 // let myP5MovRec; // Please prepare instance in global
 let gImg;
-let gVd;
+let gVd, gVdOrg;
 let gMovieFPS;
 let gPoints = [];
 const gPointsHistory = [[]];
@@ -91,7 +91,7 @@ function draw() {
           fill('#000000A0');
           strokeCap(ROUND);
           noStroke();
-          rectMode(CENTER)
+          rectMode(CENTER);
           rect(width / 2, height / 2, width / 4, height / 4, 20);
 
           fill('white');
@@ -189,6 +189,7 @@ const handleMovieFile = (f) => {
     setMovieControls(getFrameIndex(gVd.duration()), onChangeFrameIndex);
     setGuiPos(gVd.width, 0);
   });
+  gVdOrg = gVd;
 };
 
 const onChangeFrameIndex = () => {
@@ -334,6 +335,7 @@ const selectFrame = () => {
   deleteMovieControls();
   const totalFrames = getFrameIndex(gVd.duration());
   setImageControls(totalFrames, false);
+  setBackToMovie();
   setGuiPos(width, 0);
 
   gImg = gVd;
@@ -395,4 +397,16 @@ const outputScript = (name, text) => {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+};
+
+const backToMovie = () => {
+  gImg = undefined;
+  gVd = gVdOrg;
+
+  deleteImageControls();
+
+  noCanvas();
+  gVd.show();
+  gVd.showControls();
+  setMovieControls(getFrameIndex(gVd.duration()), onChangeFrameIndex);
 };
