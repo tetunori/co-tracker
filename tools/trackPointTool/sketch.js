@@ -2,10 +2,10 @@
 let gImg;
 let gVd, gVdOrg;
 let gMovieFPS;
+
 let gPoints = [];
 const gPointsHistory = [[]];
 let gPointsHistoryIndex = 0;
-
 let draggingPointIdx = undefined;
 
 let gFrameCountOnCopied = undefined;
@@ -13,23 +13,30 @@ let gFrameCountOnCopied = undefined;
 const defaultMarkSize = 5;
 const markFillColor = 'white';
 const markHighlightFillColor = '#ffbe0b';
-const markStrokeColor = 'black';
+const markStrokeColor = 30;
 
 function setup() {
   // Prepare GUI
-  const initOpstion = {
+  const initOption = {
     frameIndex: 0,
     showCoordinate: false,
     showIndexNumber: true,
     overlayColor: '#00000000',
   };
   const callbacks = {
-    selectFrame: () => {selectFrame()},
-    backToMovie: () => {backToMovie()},
-    downloadData: () => {downloadData()},
-  }
-  prepareDatGUI(initOpstion, callbacks);
+    selectFrame: () => {
+      selectFrame();
+    },
+    backToMovie: () => {
+      backToMovie();
+    },
+    downloadData: () => {
+      downloadData();
+    },
+  };
+  prepareDatGUI(initOption, callbacks);
 
+  // Setup canvas
   createCanvas(windowWidth, windowHeight).drop(handleFile);
 
   textFont('Noto Sans JP');
@@ -48,17 +55,19 @@ function draw() {
     // Marking mode if image is already set
     image(gImg, 0, 0, gImg.width, gImg.height);
 
-    // Overlay for higher visibility
+    // Transparent overlay for higher visibility
     push();
-    noStroke();
-    fill(options.overlayColor);
-    rect(0, 0, width, height);
+    {
+      noStroke();
+      fill(options.overlayColor);
+      rect(0, 0, width, height);
+    }
     pop();
 
     // Draw marks
     gPoints.forEach((p, index) => {
       let markSize = defaultMarkSize;
-      let xIndexTextOffset = defaultMarkSize * 2;
+      const xIndexTextOffset = defaultMarkSize * 2;
       let xPos = p.x;
       let yPos = p.y;
       push();
@@ -76,7 +85,11 @@ function draw() {
           textSize(textSize() * 2);
           fill(markHighlightFillColor);
         }
+
+        // Draw mark
         circle(xPos, yPos, markSize);
+
+        // Draw index number near the mark
         if (options.showIndexNumber) {
           text(index, xPos + xIndexTextOffset, yPos);
         }
@@ -135,7 +148,7 @@ function draw() {
       pop();
 
       // Draw text for operation
-      fill('black');
+      fill(30);
       textAlign(CENTER, CENTER);
       textSize(width / 24);
       text('Drag & Drop image/movie file.', width / 2, height / 2);
@@ -147,10 +160,8 @@ function draw() {
 const handleFile = (f) => {
   // console.log(f)
 
-  if (gImg) {
-    if (f.type === 'text') {
-      handleTextFile(f);
-    }
+  if (gImg && f.type === 'text') {
+    handleTextFile(f);
   }
 
   if (gVd || gImg) {
@@ -386,12 +397,12 @@ const downloadData = () => {
   navigator.clipboard.writeText(dataText);
 
   const prefix = '    # [frameIdx, xPos, yPos] \n';
-  outputScript(name, prefix + dataText);
+  outputText(name, prefix + dataText);
 
   gFrameCountOnCopied = frameCount;
 };
 
-const outputScript = (name, text) => {
+const outputText = (name, text) => {
   // create .txt file since .js files will be stopped for security reason.
   let blob = new Blob([text], { type: 'text/plain' });
   let a = document.createElement('a');

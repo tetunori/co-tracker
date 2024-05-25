@@ -90,6 +90,7 @@ const setImageControls = (maxFrameIndex = 10000, bEnable) => {
   addToHintsFolder('[Ctrl + Click] Remove');
   addToHintsFolder('[Delete] Remove All');
   addToHintsFolder('[Ctrl + Z/Y] History');
+  addToHintsFolder('[Drop Data File] Load data');
   hintsFolder.open();
 };
 
