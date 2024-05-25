@@ -108,11 +108,10 @@ const deleteImageControls = () => {
   controlFolder.remove(overlayColor);
   controlFolder.remove(copyDownloadData);
   controlFolder.remove(backToMovieCtrl);
-  gui.removeFolder(hintsFolder)
+  gui.removeFolder(hintsFolder);
   hintsFolder = gui.addFolder('Hints');
   hintsFolder.add(utilities, 'NoOp').name('[H] key to hide menu');
   hintsFolder.open();
-
 };
 
 const setGuiPos = (x, y) => {
