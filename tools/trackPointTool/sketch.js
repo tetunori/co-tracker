@@ -18,6 +18,7 @@ function setup() {
   const initOpstion = {
     frameIndex: 0,
     showCoordinate: false,
+    showIndexNumber: true,
   };
   prepareDatGUI(initOpstion);
 
@@ -58,7 +59,9 @@ function draw() {
           fill(markHighlightFillColor);
         }
         circle(xPos, yPos, markSize);
-        text(index, xPos + defaultMarkSize * 2, yPos);
+        if (options.showIndexNumber) {
+          text(index, xPos + defaultMarkSize * 2, yPos);
+        }
       }
       pop();
     });
@@ -126,9 +129,6 @@ const handleFile = (f) => {
 };
 
 const handleImageFile = (f) => {
-  const maxFrameIndex = 10000;
-  setImageControls(maxFrameIndex, true);
-
   // Remove the current image, if any.
   if (gImg) {
     gImg.remove();
@@ -136,6 +136,10 @@ const handleImageFile = (f) => {
 
   gImg = createImg(f.data, '', '', () => {
     resizeCanvas(gImg.width, gImg.height);
+
+    const maxFrameIndex = 10000;
+    setImageControls(maxFrameIndex, true);
+    setGuiPos(width, 0);
   });
   gImg.hide();
 };
@@ -150,6 +154,7 @@ const handleMovieFile = (f) => {
     // gVd.parent('forVideo');
     gVd.showControls();
     setMovieControls(getFrameIndex(gVd.duration()), onChangeFrameIndex);
+    setGuiPos(gVd.width, 0);
   });
 };
 
@@ -286,13 +291,15 @@ const selectFrame = () => {
   gVd.pause();
   gVd.hide();
 
+  // Prepare p5.js canvas
+  createCanvas(gVd.width, gVd.height);
+
   // Reload gui dat
   deleteMovieControls();
   const totalFrames = getFrameIndex(gVd.duration());
   setImageControls(totalFrames, false);
+  setGuiPos(width, 0);
 
-  // Prepare p5.js canvas
-  createCanvas(gVd.width, gVd.height);
   gImg = gVd;
   gVd = undefined;
 };

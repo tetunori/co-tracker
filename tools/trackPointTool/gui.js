@@ -33,6 +33,7 @@ const prepareDatGUI = (opt) => {
   // Set initial values
   options.frameIndex = opt.frameIndex;
   options.showCoordinate = opt.showCoordinate;
+  options.showIndexNumber = opt.showIndexNumber;
   gui.updateDisplay();
 
   // Controls
@@ -58,6 +59,7 @@ const setImageControls = (maxFrameIndex = 10000, bEnable) => {
     frameIndex.name('Frame: ' + options.frameIndex);
   }
   controlFolder.add(options, 'showCoordinate', false).name('Show Coordinate');
+  controlFolder.add(options, 'showIndexNumber', true).name('Show Index');
   controlFolder.add(utilities, 'DownloadData').name('Download Data');
   hintsFolder.add(utilities, 'NoOp').name('[Click] Add');
   hintsFolder.add(utilities, 'NoOp').name('[Drag & Drop] Move');
@@ -72,9 +74,16 @@ const setMovieControls = (maxFrameIndex = 10000, callback) => {
   frameIndex.onChange(callback);
   selectFrameCtrl = controlFolder.add(utilities, 'SelectFrame').name('Select Frame');
   controlFolder.open();
+
 };
 
 const deleteMovieControls = () => {
   controlFolder.remove(frameIndex);
   controlFolder.remove(selectFrameCtrl);
 };
+
+const setGuiPos = (x, y) => {
+  gui.domElement.style.left = x + 'px';
+  gui.domElement.style.top = y + 'px';
+  gui.domElement.style.position = 'absolute';
+}
