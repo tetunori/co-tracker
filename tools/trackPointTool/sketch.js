@@ -23,7 +23,12 @@ function setup() {
     showIndexNumber: true,
     overlayColor: '#00000000',
   };
-  prepareDatGUI(initOpstion);
+  const callbacks = {
+    selectFrame: () => {selectFrame()},
+    backToMovie: () => {backToMovie()},
+    downloadData: () => {downloadData()},
+  }
+  prepareDatGUI(initOpstion, callbacks);
 
   createCanvas(windowWidth, windowHeight).drop(handleFile);
 
@@ -184,7 +189,6 @@ const handleMovieFile = (f) => {
   gVd = createVideo(f.data, () => {
     // Change layer order for user operation
     noCanvas();
-    // gVd.parent('forVideo');
     gVd.showControls();
     setMovieControls(getFrameIndex(gVd.duration()), onChangeFrameIndex);
     setGuiPos(gVd.width, 0);

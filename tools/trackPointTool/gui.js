@@ -2,27 +2,14 @@
 let gui;
 let controlFolder;
 let hintsFolder;
-let frameIndex;
-let selectFrameCtrl;
-let showCoordinate;
-let showIndexNumber;
-let overlayColor;
-let copyDownloadData;
-let backToMovieCtrl;
 
 // Setting values for dat GUI
 const options = new Object();
 
 const utilities = {
-  SelectFrame: () => {
-    selectFrame();
-  },
-  BackToMovie: () => {
-    backToMovie();
-  },
-  DownloadData: () => {
-    downloadData();
-  },
+  SelectFrame: undefined,
+  BackToMovie: undefined,
+  DownloadData: undefined,
   SaveImage: () => {
     saveImage();
   },
@@ -34,20 +21,23 @@ const utilities = {
   },
 };
 
-const prepareDatGUI = (opt) => {
+const prepareDatGUI = (opt, cbs) => {
   gui = new dat.GUI({ closeOnTop: true, hideable: true });
   // h key to hide menu
+
+  // Regist callbacks
+  utilities.SelectFrame = cbs.selectFrame;
+  utilities.BackToMovie = cbs.backToMovie;
+  utilities.DownloadData = cbs.downloadData;
 
   // Set initial values
   options.frameIndex = opt.frameIndex;
   options.showCoordinate = opt.showCoordinate;
   options.showIndexNumber = opt.showIndexNumber;
   options.overlayColor = opt.overlayColor;
-  gui.updateDisplay();
 
   // Controls
-  controlFolder = gui.addFolder('Controls');
-  controlFolder.open();
+  initControlFolder();
 
   // Appendix
   const appendixFolder = gui.addFolder('Appendix');
@@ -57,69 +47,90 @@ const prepareDatGUI = (opt) => {
 
   // Hint text
   hintsFolder = gui.addFolder('Hints');
-  hintsFolder.add(utilities, 'NoOp').name('[H] key to hide menu');
+  addToHintsFolder('[H] key to hide menu');
   hintsFolder.open();
+
+  gui.updateDisplay();
+};
+
+const initControlFolder = () => {
+  if (controlFolder) {
+    controlFolder.children.forEach((element) => {
+      controlFolder.remove(element);
+    });
+  } else {
+    controlFolder = gui.addFolder('Controls');
+  }
+  controlFolder.children = [];
+  controlFolder.open();
 };
 
 const setImageControls = (maxFrameIndex = 10000, bEnable) => {
-  frameIndex = controlFolder.add(options, 'frameIndex', 0, maxFrameIndex, 1);
+  const fI = addToCtrlFolder(options, 'frameIndex', 0, maxFrameIndex, 1);
   if (!bEnable) {
-    frameIndex.domElement.hidden = true;
-    frameIndex.name('Frame: ' + options.frameIndex);
+    fI.domElement.hidden = true;
+    fI.name('Frame: ' + options.frameIndex);
   }
-  showCoordinate = controlFolder.add(options, 'showCoordinate', false).name('Show Coordinate');
-  showIndexNumber = controlFolder.add(options, 'showIndexNumber', true).name('Show Index');
-  overlayColor = controlFolder
-    .add(options, 'overlayColor', {
-      None: '#00000000',
-      'Opaque Black': '#000000C0',
-      'Translucent Black': '#00000080',
-      'Opaque White': '#ffffffC0',
-      'Translucent White': '#ffffff80',
-    })
+  addToCtrlFolder(options, 'showCoordinate', false).name('Show Coordinate');
+  addToCtrlFolder(options, 'showIndexNumber', true).name('Show Index');
+  addToCtrlFolder(options, 'overlayColor', {
+    None: '#00000000',
+    'Opaque Black': '#000000C0',
+    'Translucent Black': '#00000080',
+    'Opaque White': '#ffffffC0',
+    'Translucent White': '#ffffff80',
+  })
     .name('Overlay Color')
     .setValue('#00000000');
-  copyDownloadData = controlFolder.add(utilities, 'DownloadData').name('Copy & Download Data');
-  hintsFolder.add(utilities, 'NoOp').name('[Click] Add');
-  hintsFolder.add(utilities, 'NoOp').name('[Drag & Drop] Move');
-  hintsFolder.add(utilities, 'NoOp').name('[Ctrl + Click] Remove');
-  hintsFolder.add(utilities, 'NoOp').name('[Delete] Remove All');
-  hintsFolder.add(utilities, 'NoOp').name('[Ctrl + Z/Y] History');
+  addToCtrlFolder(utilities, 'DownloadData').name('Copy & Download Data');
   controlFolder.open();
+
+  addToHintsFolder('[Click] Add');
+  addToHintsFolder('[Drag & Drop] Move');
+  addToHintsFolder('[Ctrl + Click] Remove');
+  addToHintsFolder('[Delete] Remove All');
+  addToHintsFolder('[Ctrl + Z/Y] History');
+  hintsFolder.open();
+};
+
+const deleteImageControls = () => {
+  initControlFolder();
+
+  gui.removeFolder(hintsFolder);
+  hintsFolder = gui.addFolder('Hints');
+  addToHintsFolder('[H] key to hide menu');
   hintsFolder.open();
 };
 
 const setMovieControls = (maxFrameIndex = 10000, callback) => {
-  frameIndex = controlFolder.add(options, 'frameIndex', 0, maxFrameIndex, 1).name('Frame Index');
-  frameIndex.onChange(callback);
-  selectFrameCtrl = controlFolder.add(utilities, 'SelectFrame').name('Select Frame');
+  addToCtrlFolder(options, 'frameIndex', 0, maxFrameIndex, 1)
+    .name('Frame Index')
+    .onChange(callback);
+  addToCtrlFolder(utilities, 'SelectFrame').name('Select Frame');
   controlFolder.open();
 };
 
 const deleteMovieControls = () => {
-  controlFolder.remove(frameIndex);
-  controlFolder.remove(selectFrameCtrl);
-};
-
-const deleteImageControls = () => {
-  controlFolder.remove(frameIndex);
-  controlFolder.remove(showCoordinate);
-  controlFolder.remove(showIndexNumber);
-  controlFolder.remove(overlayColor);
-  controlFolder.remove(copyDownloadData);
-  controlFolder.remove(backToMovieCtrl);
-  gui.removeFolder(hintsFolder);
-  hintsFolder = gui.addFolder('Hints');
-  hintsFolder.add(utilities, 'NoOp').name('[H] key to hide menu');
-  hintsFolder.open();
-};
-
-const setGuiPos = (x, y) => {
-  gui.domElement.style.left = x + 'px';
-  gui.domElement.style.top = y + 'px';
-  gui.domElement.style.position = 'absolute';
+  initControlFolder();
 };
 
 const setBackToMovie = () => {
-  backToMovieCtrl = controlFolder.add(utilities, 'BackToMovie', true).name('Back to Movie');
+  addToCtrlFolder(utilities, 'BackToMovie').name('Back to Movie');
+};
+
+const setGuiPos = (x, y) => {
+  const styl = gui.domElement.style;
+  styl.left = x + 'px';
+  styl.top = y + 'px';
+  styl.position = 'absolute';
+};
+
+const addToCtrlFolder = (...params) => {
+  const retVal = controlFolder.add(...params);
+  controlFolder.children.push(retVal);
+  return retVal;
+};
+
+const addToHintsFolder = (nameText) => {
+  hintsFolder.add(utilities, 'NoOp').name(nameText);
 };
