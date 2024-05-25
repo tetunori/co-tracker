@@ -304,6 +304,9 @@ function keyPressed() {
       gPoints.length = 0;
       gPoints = [...gPointsHistory[gPointsHistoryIndex]];
     }
+  } else if (keyIsDown(DELETE)) {
+    gPoints = [];
+    addPointsHistory();
   }
 
   // switch (keyCode) {

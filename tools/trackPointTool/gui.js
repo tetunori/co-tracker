@@ -74,6 +74,7 @@ const setImageControls = (maxFrameIndex = 10000, bEnable) => {
   hintsFolder.add(utilities, 'NoOp').name('[Click] Add');
   hintsFolder.add(utilities, 'NoOp').name('[Drag & Drop] Move');
   hintsFolder.add(utilities, 'NoOp').name('[Ctrl + Click] Remove');
+  hintsFolder.add(utilities, 'NoOp').name('[Delete] Remove All');
   hintsFolder.add(utilities, 'NoOp').name('[Ctrl + Z/Y] History');
   controlFolder.open();
   hintsFolder.open();
