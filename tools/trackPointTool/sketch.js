@@ -201,7 +201,7 @@ const handleMovieFile = (f) => {
     // Change layer order for user operation
     noCanvas();
     gVd.showControls();
-    setMovieControls(getFrameIndex(gVd.duration()), onChangeFrameIndex);
+    setMovieControls(getFrameIndex(gVd.duration()) - 1, onChangeFrameIndex);
     setGuiPos(gVd.width, 0);
   });
   gVdOrg = gVd;
@@ -210,7 +210,7 @@ const handleMovieFile = (f) => {
 const onChangeFrameIndex = () => {
   if (gVd) {
     const totalFrames = getFrameIndex(gVd.duration());
-    gVd.time((options.frameIndex / totalFrames) * gVd.duration());
+    gVd.time((round(10000 * (options.frameIndex / totalFrames)) / 10000) * gVd.duration() + 0.0001);
   }
 };
 
@@ -230,7 +230,7 @@ const handleTextFile = (f) => {
 };
 
 const getFrameIndex = (frameTime) => {
-  return Math.floor(frameTime * gMovieFPS);
+  return round(frameTime * gMovieFPS);
 };
 
 const showCursorCoordinate = () => {
@@ -423,5 +423,5 @@ const backToMovie = () => {
   noCanvas();
   gVd.show();
   gVd.showControls();
-  setMovieControls(getFrameIndex(gVd.duration()), onChangeFrameIndex);
+  setMovieControls(getFrameIndex(gVd.duration()) - 1, onChangeFrameIndex);
 };
