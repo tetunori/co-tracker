@@ -93,6 +93,7 @@ function draw() {
 
         // Draw index number near the mark
         if (options.showIndexNumber) {
+          strokeWeight(2);
           text(index, xPos + xIndexTextOffset, yPos);
         }
       }
