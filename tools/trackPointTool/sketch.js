@@ -126,7 +126,7 @@ function draw() {
     // Selecting frame mode if video is set
     // In this mode, only to control frame index on canvas
     if (!gVd.elt.paused || gVd.elt.seeking) {
-      const frameIndex = getFrameIndex(gVd.elt.currentTime);
+      const frameIndex = min(getFrameIndex(gVd.elt.currentTime), getFrameIndex(gVd.duration()) - 1);
       if (options.frameIndex !== frameIndex) {
         options.frameIndex = frameIndex;
         gIsSeeked = true;
