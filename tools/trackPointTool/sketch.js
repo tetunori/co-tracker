@@ -10,6 +10,8 @@ let draggingPointIdx = undefined;
 
 let gFrameCountOnCopied = undefined;
 
+let gIsSeeked = false;
+
 const defaultMarkSize = 5;
 const markFillColor = 'white';
 const markHighlightFillColor = '#ffbe0b';
@@ -127,6 +129,7 @@ function draw() {
       const frameIndex = getFrameIndex(gVd.elt.currentTime);
       if (options.frameIndex !== frameIndex) {
         options.frameIndex = frameIndex;
+        gIsSeeked = true;
         setTimeout(() => {
           gui.updateDisplay();
         }, 10);
@@ -203,6 +206,15 @@ const handleMovieFile = (f) => {
     gVd.showControls();
     setMovieControls(getFrameIndex(gVd.duration()) - 1, onChangeFrameIndex);
     setGuiPos(gVd.width, 0);
+    gVd.elt.onpause = () => {
+      onChangeFrameIndex();
+    };
+    gVd.elt.onseeked = () => {
+      if (gIsSeeked) {
+        onChangeFrameIndex();
+        gIsSeeked = false;
+      }
+    };
   });
   gVdOrg = gVd;
 };
