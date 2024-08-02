@@ -81,7 +81,7 @@ function draw() {
       fill('black');
       textAlign(CENTER, CENTER);
       textSize(width / 24);
-      text('Drag & Drop image/movie file.', width / 2, height / 2);
+      text('Drag & Drop a movie file.', width / 2, height / 2);
     }
     pop();
   }
@@ -120,7 +120,8 @@ const handleMovieFile = (f) => {
 const onChangeFrameIndex = () => {
   if (gVd) {
     const totalFrames = getFrameIndex(gVd.duration());
-    gVd.time(ceil(100000*(options.frameIndex / totalFrames) * gVd.duration())/100000);
+    // gVd.time(ceil(100000*(options.frameIndex / totalFrames) * gVd.duration())/100000);
+    gVd.time((options.frameIndex / totalFrames) * gVd.duration());
   }
 };
 
